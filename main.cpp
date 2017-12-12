@@ -108,20 +108,21 @@ void report(const char *file1, const char *file2, unsigned long long result, dou
             break;
     }
     cout << "Processing           : " << ss.str() << endl;
-    cout << "Result               : " << result << endl;
+    cout << "Result (XOR start)   : " << result << endl;
     
     if (runPresorted)
-        cout << "Sorting              : " << timeSorting << " secs" << endl;
+        cout << "Sorting time         : " << timeSorting << " secs" << endl;
     
     if (runParallel > 0)
     {
-        cout << "Partitioning         : " << timeIndexingOrPartitioning << " secs" << endl;
+        cout << "Partitioning time    : " << timeIndexingOrPartitioning << " secs" << endl;
     }
     else if (runAlgorithm == ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING)
     {
-        cout << "Indexing             : " << timeIndexingOrPartitioning << " secs" << endl;
+        cout << "Indexing time        : " << timeIndexingOrPartitioning << " secs" << endl;
     }
-    cout << "Joining              : " << timeJoining << " secs" << endl << endl;
+    cout << "Joining time         : " << timeJoining << " secs" << endl;
+    cout << "Total time           : " << (timeSorting+timeIndexingOrPartitioning+timeJoining) << " secs" << endl << endl;
 }
 
 
