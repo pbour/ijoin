@@ -47,7 +47,7 @@ void usage()
     cerr << "       -a" << endl;
     cerr << "              join algorithm" << endl;
     cerr << "       -s" << endl;
-    cerr << "              pre-sorting input files; mandatory only for single-threaded processing" << endl;
+    cerr << "              pre-sort input files; mandatory only for single-threaded processing" << endl;
     cerr << "       -b" << endl;
     cerr << "              number of buckets; default value is 1000; mandatory only for bgFS algorithm" << endl;
     cerr << "       -h" << endl;
@@ -58,7 +58,7 @@ void usage()
     cerr << "              number of threads available" << endl << endl;
     cerr << "       Other arguments" << endl << endl;
     cerr << "       -u" << endl;
-    cerr << "              looping unrolling enforced; by default is deactivted" << endl;
+    cerr << "              loop unrolling enforced; by default is deactivated" << endl;
     cerr << "       -g" << endl;
     cerr << "              greedy scheduling activated; valid only with -d option" << endl;
     cerr << "       -m" << endl;
