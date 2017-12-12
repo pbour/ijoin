@@ -58,7 +58,7 @@ void usage()
     cerr << "              number of threads available" << endl << endl;
     cerr << "       Other arguments" << endl << endl;
     cerr << "       -u" << endl;
-    cerr << "              loop unrolling enforced; by default is deactivated" << endl;
+    cerr << "              loop unrolling activated; by default is deactivated" << endl;
     cerr << "       -g" << endl;
     cerr << "              greedy scheduling activated; valid only with -d option" << endl;
     cerr << "       -m" << endl;
@@ -92,7 +92,7 @@ void report(const char *file1, const char *file2, unsigned long long result, dou
             break;
     }
     cout << "Algorithm            : " << ss.str() << endl;
-    cout << "Unrolling            : " << ((runUnrolled) ? "yes": "no") << endl;
+    cout << "Loop unrolling       : " << ((runUnrolled) ? "yes": "no") << endl;
 
     ss.str("");
     switch (runParallel)
