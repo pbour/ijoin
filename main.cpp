@@ -210,7 +210,6 @@ int main(int argc, char **argv)
         case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP:
             if (!runParallel)
             {
-                cout<<runParallel<<endl;exit(1);
                 if (runUnrolled)
                 {
                     tim.start();
