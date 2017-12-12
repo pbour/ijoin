@@ -10,6 +10,7 @@
 #include <limits>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <algorithm>
 #include <queue>
 #include <fstream>

@@ -71,6 +71,61 @@ void usage()
 }
 
 
+void report(const char *file1, const char *file2, unsigned long long result, double timeSorting, double timeIndexingOrPartitioning, double timeJoining, int runAlgorithm, int runParallel, int runNumThreads, int runNumBuckets)
+{
+    stringstream ss;
+
+    
+    cout << "R           : " << file1 << endl;
+    cout << "S           : " << file2 << endl;
+    
+    switch (runAlgorithm)
+    {
+        case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP:
+            ss << "FS";
+            break;
+        case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING:
+            ss << "gFS";
+            break;
+        case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING:
+            ss << "bgFS with " << runNumBuckets << " buckets";
+            break;
+    }
+    cout << "Algorithm   : " << ss.str() << endl;
+
+    ss.str("");
+    switch (runParallel)
+    {
+        case 0:
+            ss << "Single-threaded";
+            break;
+        case PARALLEL_HASH_BASED:
+            ss << "Parallel, hash-based with " << runNumThreads << " threads";
+            break;
+        case PARALLEL_DOMAIN_BASED:
+            ss << "Parallel, domain-based with " << runNumThreads << " threads";
+            break;
+    }
+    cout << "Processing  : " << ss.str() << endl;
+//    if (!runParallel)
+//    {
+//        cout << "
+    cout << "result      : " << result << endl;
+    cout << "sorting     : " << timeSorting << " secs" << endl;
+    
+    if (runParallel > 0)
+    {
+        cout << "partitioning: ";
+    }
+    else if (runAlgorithm == ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING)
+    {
+        cout << "indexing    : ";
+    }
+    cout << timeIndexingOrPartitioning << " secs" << endl;
+    cout << "joining     : " << timeJoining << " secs" << endl;
+
+}
+
 
 int main(int argc, char **argv)
 {
@@ -78,7 +133,7 @@ int main(int argc, char **argv)
     unsigned int runAlgorithm = 0, runNumBuckets = 1000, runParallel = 0, runNumThreads = 1, n;
     bool runPresorted = false, runUnrolled = false, runGreedyScheduling = false, runMiniJoinsBreakDown = false, runAdaptivePartitioning = false;
     Timer tim;
-    double cost = 0;
+    double timeSorting = 0, timeIndexingOrPartitioning = 0, timeJoining = 0;
     Relation R, S, *pR, *pS, *prR, *prS, *prfR, *prfS;
     size_t *pR_size, *pS_size, *prR_size, *prS_size, *prfR_size, *prfS_size;
     BucketIndex BIR, BIS, *pBIR, *pBIS, *prBIR, *prBIS;
@@ -184,7 +239,7 @@ int main(int argc, char **argv)
         tim.start();
         R.sortByStart();
         S.sortByStart();
-        cost += tim.stop();
+        timeSorting = tim.stop();
     }
     else if ((runParallel > 0) && (runPresorted))
     {
@@ -200,7 +255,7 @@ int main(int argc, char **argv)
                 S.sortByStart();
             }
         }
-        cost += tim.stop();
+        timeSorting = tim.stop();
     }
     
     
@@ -214,13 +269,13 @@ int main(int argc, char **argv)
                 {
                     tim.start();
                     result = ForwardScanBased_PlaneSweep_Unrolled(R, S);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
                 else
                 {
                     tim.start();
                     result = ForwardScanBased_PlaneSweep_Rolled(R, S);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
             }
             else if (runParallel == PARALLEL_HASH_BASED)
@@ -230,19 +285,19 @@ int main(int argc, char **argv)
 
                 tim.start();
                 ParallelHashBased_Partitioning(R, S, pR, pS, runNumThreads);
-                cost += tim.stop();
+                timeIndexingOrPartitioning = tim.stop();
                 
                 if (runUnrolled)
                 {
                     tim.start();
                     result = ParallelHashBased_ForwardScanBased_PlaneSweep_Unrolled(pR, pS, runNumThreads);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
                 else
                 {
                     tim.start();
                     result = ParallelHashBased_ForwardScanBased_PlaneSweep_Rolled(pR, pS, runNumThreads);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
 
                 delete[] pR;
@@ -257,13 +312,13 @@ int main(int argc, char **argv)
                 {
                     tim.start();
                     result = ForwardScanBased_PlaneSweep_Grouping_Unrolled(R, S);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
                 else
                 {
                     tim.start();
                     result = ForwardScanBased_PlaneSweep_Grouping_Rolled(R, S);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
             }
             else if (runParallel == PARALLEL_HASH_BASED)
@@ -273,19 +328,19 @@ int main(int argc, char **argv)
 
                 tim.start();
                 ParallelHashBased_Partitioning(R, S, pR, pS, runNumThreads);
-                cost += tim.stop();
+                timeIndexingOrPartitioning = tim.stop();
                 
                 if (runUnrolled)
                 {
                     tim.start();
                     result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Unrolled(pR, pS, runNumThreads);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
                 else
                 {
                     tim.start();
                     result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Rolled(pR, pS, runNumThreads);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
 
                 delete[] pR;
@@ -299,19 +354,19 @@ int main(int argc, char **argv)
                 tim.start();
                 BIR.build(R, runNumBuckets);
                 BIS.build(S, runNumBuckets);
-                cost += tim.stop();
+                timeIndexingOrPartitioning = tim.stop();
                 
                 if (runUnrolled)
                 {
                     tim.start();
                     result = ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(R, S, BIR, BIS);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
                 else
                 {
                     tim.start();
                     result = ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled(R, S, BIR, BIS);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
             }
             else if (runParallel == PARALLEL_HASH_BASED)
@@ -323,19 +378,19 @@ int main(int argc, char **argv)
                 
                 tim.start();
                 ParallelHashBased_Partitioning(R, S, pR, pS, pBIR, pBIS, runNumThreads, runNumBuckets);
-                cost += tim.stop();
+                timeIndexingOrPartitioning += tim.stop();
                 
                 if (runUnrolled)
                 {
                     tim.start();
                     result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(pR, pS, pBIR, pBIS, runNumThreads);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
                 else
                 {
                     tim.start();
                     result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled(pR, pS, pBIR, pBIS, runNumThreads);
-                    cost += tim.stop();
+                    timeJoining = tim.stop();
                 }
                 
                 delete[] pR;
@@ -349,7 +404,8 @@ int main(int argc, char **argv)
     
     
     // Report stats
-    cout << argv[optind] << "\t" << argv[optind+1] << "\t" << result << "\t" << cost << " secs" << endl;
+//    void report(const char *file1, const char *file2, unsigned long long result, double timeSorting, double timeIndexingOrPartitioning, double timeJoining, int runAlgorithm, int runParallel)
+    report(argv[optind], argv[optind+1], result, timeSorting, timeIndexingOrPartitioning, timeJoining, runAlgorithm, runParallel, runNumThreads, runNumBuckets);
 
     
     return 0;
