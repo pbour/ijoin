@@ -1,10 +1,10 @@
-NAME
+##NAME
        ij - compute interval overlap join
 
-USAGE
+##USAGE
        ij [OPTION]... [FILE1] [FILE2]
 
-DESCRIPTION
+##DESCRIPTION
        Mandatory arguments
 
        -a
