@@ -71,7 +71,7 @@ void usage()
 }
 
 
-void report(const char *file1, const char *file2, unsigned long long result, double timeSorting, double timeIndexingOrPartitioning, double timeJoining, int runAlgorithm, int runParallel, int runNumThreads, int runNumBuckets)
+void report(const char *file1, const char *file2, unsigned long long result, double timeSorting, double timeIndexingOrPartitioning, double timeJoining, int runAlgorithm, int runParallel, int runNumThreads, int runNumBuckets, bool runUnrolled)
 {
     stringstream ss;
 
@@ -88,10 +88,11 @@ void report(const char *file1, const char *file2, unsigned long long result, dou
             ss << "gFS";
             break;
         case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING:
-            ss << "bgFS with " << runNumBuckets << " buckets";
+            ss << "bgFS" << endl << "Buckets     : " << runNumBuckets;
             break;
     }
     cout << "Algorithm   : " << ss.str() << endl;
+    cout << "Unrolling   : " << ((runUnrolled) ? "yes": "no") << endl;
 
     ss.str("");
     switch (runParallel)
@@ -100,26 +101,26 @@ void report(const char *file1, const char *file2, unsigned long long result, dou
             ss << "Single-threaded";
             break;
         case PARALLEL_HASH_BASED:
-            ss << "Parallel, hash-based with " << runNumThreads << " threads";
+            ss << "Parallel, hash-based" << endl << "Threads     : " << runNumThreads;
             break;
         case PARALLEL_DOMAIN_BASED:
-            ss << "Parallel, domain-based with " << runNumThreads << " threads";
+            ss << "Parallel, domain-based" << endl << "Threads     : " << runNumThreads;
             break;
     }
     cout << "Processing  : " << ss.str() << endl;
-    cout << "result      : " << result << endl;
-    cout << "sorting     : " << timeSorting << " secs" << endl;
+    cout << "Result      : " << result << endl;
+    cout << "Sorting     : " << timeSorting << " secs" << endl;
     
     if (runParallel > 0)
     {
-        cout << "partitioning: ";
+        cout << "Partitioning: ";
     }
     else if (runAlgorithm == ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING)
     {
-        cout << "indexing    : ";
+        cout << "Indexing    : ";
     }
     cout << timeIndexingOrPartitioning << " secs" << endl;
-    cout << "joining     : " << timeJoining << " secs" << endl;
+    cout << "Joining     : " << timeJoining << " secs" << endl;
 
 }
 
@@ -402,7 +403,7 @@ int main(int argc, char **argv)
     
     // Report stats
 //    void report(const char *file1, const char *file2, unsigned long long result, double timeSorting, double timeIndexingOrPartitioning, double timeJoining, int runAlgorithm, int runParallel)
-    report(argv[optind], argv[optind+1], result, timeSorting, timeIndexingOrPartitioning, timeJoining, runAlgorithm, runParallel, runNumThreads, runNumBuckets);
+    report(argv[optind], argv[optind+1], result, timeSorting, timeIndexingOrPartitioning, timeJoining, runAlgorithm, runParallel, runNumThreads, runNumBuckets, runUnrolled);
 
     
     return 0;
