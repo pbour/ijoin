@@ -10,7 +10,7 @@ Compute interval overlap joins
        -a
               join algorithm
        -s
-              pre-sorting input files; mandatory only for single-threaded processing
+              pre-sorte input files; mandatory only for single-threaded processing
        -b
               number of buckets; default value is 1000; mandatory only for bgFS algorithm
        -h
