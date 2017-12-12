@@ -4559,3 +4559,43 @@ unsigned long long ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(Relat
     
     return result;
 }
+
+
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled(Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumThreads)
+{
+    unsigned long long result = 0;
+    int n = sqrt(runNumThreads);
+    
+    
+    #pragma omp parallel for num_threads(runNumThreads) collapse(2) reduction(+ : result)
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            result += ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled(pR[i], pS[j], pBIR[i], pBIS[j]);
+        }
+    }
+    
+    
+    return result;
+}
+
+
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumThreads)
+{
+    unsigned long long result = 0;
+    int n = sqrt(runNumThreads);
+    
+    
+    #pragma omp parallel for num_threads(runNumThreads) collapse(2) reduction(+ : result)
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            result += ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(pR[i], pS[j], pBIR[i], pBIS[j]);
+        }
+    }
+    
+    
+    return result;
+}

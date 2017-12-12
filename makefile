@@ -8,7 +8,7 @@ CFLAGS  = -O3 -mavx -std=c++14 -w -march=native -I/usr/local/opt/llvm/include -f
 LDFLAGS = -L/usr/local/opt/llvm/lib
 
 
-SOURCES = containers/relation.cpp containers/bucket_index.cpp algorithms/fs.cpp algorithms/gfs.cpp algorithms/bgfs.cpp
+SOURCES = containers/relation.cpp containers/bucket_index.cpp algorithms/fs.cpp algorithms/gfs.cpp algorithms/bgfs.cpp partitioning/hash_based.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 
 all: main
@@ -26,5 +26,6 @@ main: $(OBJECTS)
 clean:
 	rm -rf containers/*.o
 	rm -rf algorithms/*.o
+	rm -rf partitions/*.o
 	rm -rf ij
 

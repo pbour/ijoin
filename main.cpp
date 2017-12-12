@@ -5,12 +5,24 @@
 
 
 
+// Single-threaded processing
 unsigned long long ForwardScanBased_PlaneSweep_Rolled                     (Relation &R, Relation &S);
 unsigned long long ForwardScanBased_PlaneSweep_Unrolled                   (Relation &R, Relation &S);
 unsigned long long ForwardScanBased_PlaneSweep_Grouping_Rolled            (Relation &R, Relation &S);
 unsigned long long ForwardScanBased_PlaneSweep_Grouping_Unrolled          (Relation &R, Relation &S);
 unsigned long long ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled  (Relation &R, Relation &S, const BucketIndex &BIR, const BucketIndex &BIS);
 unsigned long long ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(Relation &R, Relation &S, const BucketIndex &BIR, const BucketIndex &BIS);
+
+// Parallel processing
+void ParallelHashBased_Partitioning(const Relation &R, const Relation &S, Relation *pR, Relation *pS, int runNumThreads);
+void ParallelHashBased_Partitioning(const Relation& R, const Relation& S, Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumThreads, int runNumBuckets);
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Rolled                     (Relation *pR, Relation *pS, int runNumThreads);
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Unrolled                   (Relation *pR, Relation *pS, int runNumThreads);
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Rolled            (Relation *pR, Relation *pS, int runNumThreads);
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Unrolled          (Relation *pR, Relation *pS, int runNumThreads);
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled  (Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumThreads);
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumThreads);
+
 
 
 void toLowercase(char *buf)
@@ -63,12 +75,13 @@ void usage()
 int main(int argc, char **argv)
 {
     char c;
-    int runAlgorithm = 0, runNumBuckets = 1000, runParallel = 0, runNumThreads = 1;
+    unsigned int runAlgorithm = 0, runNumBuckets = 1000, runParallel = 0, runNumThreads = 1, n;
     bool runPresorted = false, runUnrolled = false, runGreedyScheduling = false, runMiniJoinsBreakDown = false, runAdaptivePartitioning = false;
     Timer tim;
     double cost = 0;
-    Relation R, S;
-    BucketIndex BIR, BIS;
+    Relation R, S, *pR, *pS, *prR, *prS, *prfR, *prfS;
+    size_t *pR_size, *pS_size, *prR_size, *prS_size, *prfR_size, *prfS_size;
+    BucketIndex BIR, BIS, *pBIR, *pBIS, *prBIR, *prBIS;
     unsigned long long result = 0;
 
 
@@ -107,6 +120,7 @@ int main(int argc, char **argv)
                 break;
             case 't':
                 runNumThreads = atoi(optarg);
+                n = sqrt(runNumThreads);
                 break;
             case 'u':
                 runUnrolled = true;
@@ -196,6 +210,7 @@ int main(int argc, char **argv)
         case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP:
             if (!runParallel)
             {
+                cout<<runParallel<<endl;exit(1);
                 if (runUnrolled)
                 {
                     tim.start();
@@ -208,6 +223,31 @@ int main(int argc, char **argv)
                     result = ForwardScanBased_PlaneSweep_Rolled(R, S);
                     cost += tim.stop();
                 }
+            }
+            else if (runParallel == PARALLEL_HASH_BASED)
+            {
+                pR = new Relation[n];
+                pS = new Relation[n];
+
+                tim.start();
+                ParallelHashBased_Partitioning(R, S, pR, pS, runNumThreads);
+                cost += tim.stop();
+                
+                if (runUnrolled)
+                {
+                    tim.start();
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Unrolled(pR, pS, runNumThreads);
+                    cost += tim.stop();
+                }
+                else
+                {
+                    tim.start();
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Rolled(pR, pS, runNumThreads);
+                    cost += tim.stop();
+                }
+
+                delete[] pR;
+                delete[] pS;
             }
             break;
 
@@ -226,6 +266,31 @@ int main(int argc, char **argv)
                     result = ForwardScanBased_PlaneSweep_Grouping_Rolled(R, S);
                     cost += tim.stop();
                 }
+            }
+            else if (runParallel == PARALLEL_HASH_BASED)
+            {
+                pR = new Relation[n];
+                pS = new Relation[n];
+
+                tim.start();
+                ParallelHashBased_Partitioning(R, S, pR, pS, runNumThreads);
+                cost += tim.stop();
+                
+                if (runUnrolled)
+                {
+                    tim.start();
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Unrolled(pR, pS, runNumThreads);
+                    cost += tim.stop();
+                }
+                else
+                {
+                    tim.start();
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Rolled(pR, pS, runNumThreads);
+                    cost += tim.stop();
+                }
+
+                delete[] pR;
+                delete[] pS;
             }
             break;
 
@@ -249,6 +314,36 @@ int main(int argc, char **argv)
                     result = ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled(R, S, BIR, BIS);
                     cost += tim.stop();
                 }
+            }
+            else if (runParallel == PARALLEL_HASH_BASED)
+            {
+                pR = new Relation[n];
+                pS = new Relation[n];
+                pBIR = new BucketIndex[n];
+                pBIS = new BucketIndex[n];
+                
+                tim.start();
+                ParallelHashBased_Partitioning(R, S, pR, pS, pBIR, pBIS, runNumThreads, runNumBuckets);
+                cost += tim.stop();
+                
+                if (runUnrolled)
+                {
+                    tim.start();
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(pR, pS, pBIR, pBIS, runNumThreads);
+                    cost += tim.stop();
+                }
+                else
+                {
+                    tim.start();
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled(pR, pS, pBIR, pBIS, runNumThreads);
+                    cost += tim.stop();
+                }
+                
+                delete[] pR;
+                delete[] pS;
+                delete[] pBIR;
+                delete[] pBIS;
+
             }
             break;
     }

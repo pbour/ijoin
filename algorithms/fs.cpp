@@ -237,3 +237,43 @@ unsigned long long ForwardScanBased_PlaneSweep_Unrolled(Relation &R, Relation &S
     
     return numResults;
 }
+
+
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Rolled(Relation *pR, Relation *pS, int runNumThreads)
+{
+    unsigned long long result = 0;
+    int n = sqrt(runNumThreads);
+    
+    
+    #pragma omp parallel for num_threads(runNumThreads) collapse(2) reduction(+ : result)
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            result += ForwardScanBased_PlaneSweep_Rolled(pR[i], pS[j]);
+        }
+    }
+    
+    
+    return result;
+}
+
+
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Unrolled(Relation *pR, Relation *pS, int runNumThreads)
+{
+    unsigned long long result = 0;
+    int n = sqrt(runNumThreads);
+    
+    
+    #pragma omp parallel for num_threads(runNumThreads) collapse(2) reduction(+ : result)
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            result += ForwardScanBased_PlaneSweep_Unrolled(pR[i], pS[j]);
+        }
+    }
+    
+    
+    return result;
+}

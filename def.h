@@ -17,7 +17,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <chrono>
-//#include "omp.h"
+#include "omp.h"
 using namespace std;
 
 
@@ -25,6 +25,7 @@ using namespace std;
 #define ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP                    2
 #define ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING           3
 #define ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING 4
+
 #define PARALLEL_HASH_BASED                                        1
 #define PARALLEL_DOMAIN_BASED                                      2
 
