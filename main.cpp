@@ -107,9 +107,6 @@ void report(const char *file1, const char *file2, unsigned long long result, dou
             break;
     }
     cout << "Processing  : " << ss.str() << endl;
-//    if (!runParallel)
-//    {
-//        cout << "
     cout << "result      : " << result << endl;
     cout << "sorting     : " << timeSorting << " secs" << endl;
     
