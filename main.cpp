@@ -71,13 +71,13 @@ void usage()
 }
 
 
-void report(const char *file1, const char *file2, unsigned long long result, double timeSorting, double timeIndexingOrPartitioning, double timeJoining, int runAlgorithm, int runParallel, int runNumThreads, int runNumBuckets, bool runUnrolled, bool runPresorted)
+void report(const char *file1, const char *file2, unsigned long long result, double timeSorting, double timeIndexingOrPartitioning, double timeJoining, int runAlgorithm, int runParallel, int runNumThreads, int runNumBuckets, bool runUnrolled, bool runPresorted, bool runGreedyScheduling, bool runMiniJoinsBreakDown, bool runAdaptivePartitioning)
 {
     stringstream ss;
 
     
-    cout << "R           : " << file1 << endl;
-    cout << "S           : " << file2 << endl;
+    cout << "R                    : " << file1 << endl;
+    cout << "S                    : " << file2 << endl;
     
     switch (runAlgorithm)
     {
@@ -88,11 +88,11 @@ void report(const char *file1, const char *file2, unsigned long long result, dou
             ss << "gFS";
             break;
         case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING:
-            ss << "bgFS" << endl << "Buckets     : " << runNumBuckets;
+            ss << "bgFS" << endl << "Buckets              : " << runNumBuckets;
             break;
     }
-    cout << "Algorithm   : " << ss.str() << endl;
-    cout << "Unrolling   : " << ((runUnrolled) ? "yes": "no") << endl;
+    cout << "Algorithm            : " << ss.str() << endl;
+    cout << "Unrolling            : " << ((runUnrolled) ? "yes": "no") << endl;
 
     ss.str("");
     switch (runParallel)
@@ -101,27 +101,27 @@ void report(const char *file1, const char *file2, unsigned long long result, dou
             ss << "Single-threaded";
             break;
         case PARALLEL_HASH_BASED:
-            ss << "Parallel, hash-based" << endl << "Threads     : " << runNumThreads;
+            ss << "Parallel, hash-based" << endl << "Threads              : " << runNumThreads;
             break;
         case PARALLEL_DOMAIN_BASED:
-            ss << "Parallel, domain-based" << endl << "Threads     : " << runNumThreads;
+            ss << "Parallel, domain-based" << endl << "Threads              : " << runNumThreads << endl << "Greedy scheduling    : " << ((runGreedyScheduling) ? "yes": "no") << endl << "Mini-joins breakdown : " << ((runMiniJoinsBreakDown) ? "yes": "no") << endl << "Adaptive partitioning: " << ((runAdaptivePartitioning) ? "yes": "no");
             break;
     }
-    cout << "Processing  : " << ss.str() << endl;
-    cout << "Result      : " << result << endl;
+    cout << "Processing           : " << ss.str() << endl;
+    cout << "Result               : " << result << endl;
     
     if (runPresorted)
-        cout << "Sorting     : " << timeSorting << " secs" << endl;
+        cout << "Sorting              : " << timeSorting << " secs" << endl;
     
     if (runParallel > 0)
     {
-        cout << "Partitioning: " << timeIndexingOrPartitioning << " secs" << endl;
+        cout << "Partitioning         : " << timeIndexingOrPartitioning << " secs" << endl;
     }
     else if (runAlgorithm == ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING)
     {
-        cout << "Indexing    : " << timeIndexingOrPartitioning << " secs" << endl;
+        cout << "Indexing             : " << timeIndexingOrPartitioning << " secs" << endl;
     }
-    cout << "Joining     : " << timeJoining << " secs" << endl << endl;
+    cout << "Joining              : " << timeJoining << " secs" << endl << endl;
 }
 
 
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
         cerr << "error - mandatory option '-s' for single-threaded processing" << endl;
         return 1;
     }
-    if ((runParallel ==  PARALLEL_DOMAIN_BASED) && (runGreedyScheduling) && (runMiniJoinsBreakDown))
+    if ((runParallel ==  PARALLEL_DOMAIN_BASED) && (runGreedyScheduling) && (!runMiniJoinsBreakDown))
     {
         cerr << "error - greedy scheduling can only be used with mini-joins break down" << endl;
         return 1;
@@ -402,7 +402,7 @@ int main(int argc, char **argv)
     
     
     // Report stats
-    report(argv[optind], argv[optind+1], result, timeSorting, timeIndexingOrPartitioning, timeJoining, runAlgorithm, runParallel, runNumThreads, runNumBuckets, runUnrolled, runPresorted);
+    report(argv[optind], argv[optind+1], result, timeSorting, timeIndexingOrPartitioning, timeJoining, runAlgorithm, runParallel, runNumThreads, runNumBuckets, runUnrolled, runPresorted, runGreedyScheduling, runMiniJoinsBreakDown, runAdaptivePartitioning);
 
     
     return 0;
