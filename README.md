@@ -1,23 +1,34 @@
-# histos
-A tool to quickly draw equi-width histograms on screen
+# ijoin
+Compute interval overlap joins
 
 ## Usage
-       $ ./histos.pl [OPTION]... [FILE]
+       $ ij [OPTION]... [FILE1] [FILE2]
 
 ## Description
-       No mandatory arguments besides input FILE
+       Mandatory arguments
 
-       -h
-              display this help message and exit
-       -c
-              column to build the histogram; default value is 1
-       -d
-              spliting delimeter in quotes to define columns; by default is set to ','
-       -b
-              number of bins to partition the domain; default value is 10
+       -a
+              join algorithm
        -s
-              display scale; default value is 1
+              pre-sorting input files; mandatory only for single-threaded processing
+       -b
+              number of buckets; default value is 1000; mandatory only for bgFS algorithm
+       -h
+              use hash-based partitioning for parallel processing
+       -d
+              use domain-based partitioning for parallel processing
+       -t
+              number of threads available; mandatory for parallel processing
+
+       Other arguments
+
+       -u
+              loop unrolling enforced; by default is deactivated
+       -g
+              greedy scheduling activated; valid only with -d option
        -m
-              minimum value contained inside input; computed internally if not given
-       -M
-              maximum value contained inside input; computed internally if not given
+              mini-joins breakdown activated; valid only with -d option
+       -v
+              adaptive partitioning activated; valid only with -d option
+       -?
+              display this help message and exit
