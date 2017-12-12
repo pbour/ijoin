@@ -12,7 +12,7 @@ public:
 	RelationIterator last;
 
 	Bucket();
-    Bucket(RelationIterator i);
+	Bucket(RelationIterator i);
 	~Bucket();
 };
 
@@ -24,7 +24,7 @@ public:
 	int numBuckets;
 	Timestamp bucket_range;
 	
-    BucketIndex();
+	BucketIndex();
 	void build(const Relation &R, int numBuckets);
 	void print(char c);
 	~BucketIndex();

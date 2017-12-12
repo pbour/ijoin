@@ -9,7 +9,7 @@ Bucket::Bucket()
 
 Bucket::Bucket(RelationIterator i)
 {
-    this->last = i;
+	this->last = i;
 }
 
 
@@ -28,17 +28,17 @@ void BucketIndex::build(const Relation &R, int numBuckets)
 {
 	int cbucket_id = 0, btmp;
 	RelationIterator i = R.begin(), lastI = R.end();
-    auto ms = R.maxStart;
+	auto ms = R.maxStart;
 
-    
-    if (R.minStart == R.maxStart)
-        ms += 1;
-    
+	
+	if (R.minStart == R.maxStart)
+		ms += 1;
+	
 	this->numBuckets = numBuckets;
-    this->bucket_range = (Timestamp)ceil((double)(ms-R.minStart)/this->numBuckets);
+	this->bucket_range = (Timestamp)ceil((double)(ms-R.minStart)/this->numBuckets);
 	this->reserve(this->numBuckets);
-    for (int i = 0; i < this->numBuckets; i++)
-        this->push_back(Bucket(lastI));
+	for (int i = 0; i < this->numBuckets; i++)
+		this->push_back(Bucket(lastI));
 
 	while (i != lastI)
 	{
@@ -57,11 +57,11 @@ void BucketIndex::build(const Relation &R, int numBuckets)
 		}
 	}
 	(*this)[this->numBuckets-1].last = lastI;
-    for (int i = this->numBuckets-2; i >= 0; i--)
-    {
-        if ((*this)[i].last == lastI)
-            (*this)[i].last = (*this)[i+1].last;
-    }
+	for (int i = this->numBuckets-2; i >= 0; i--)
+	{
+		if ((*this)[i].last == lastI)
+			(*this)[i].last = (*this)[i+1].last;
+	}
 }
 
 

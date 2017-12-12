@@ -8,13 +8,11 @@
 class Record
 {
 public:
-//    RecordId id;
 	Timestamp start;
 	Timestamp end;
 
 	Record();
-//    Record(RecordId id, Timestamp start, Timestamp end);
-    Record(Timestamp start, Timestamp end);
+	Record(Timestamp start, Timestamp end);
 	bool operator < (const Record& rhs) const;
 	bool operator >= (const Record& rhs) const;
 	void print() const;
@@ -29,13 +27,13 @@ class Relation : public vector<Record>
 public:
 	size_t numRecords;
 	Timestamp minStart, maxStart, minEnd, maxEnd;
-    Timestamp longestRecord;
+	Timestamp longestRecord;
 
 	Relation();
 	void load(const char *filename);
 	void load(const Relation& I, size_t from = 0, size_t by = 1);
 	void sortByStart();
-    void sortByEnd();
+	void sortByEnd();
 	void print(char c);
 	~Relation();
 };
