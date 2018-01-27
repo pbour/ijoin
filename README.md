@@ -33,10 +33,18 @@ Compute interval overlap joins
        -?
               display this help message and exit
 
-## Example
+## Examples
        Original forward scan-based plane sweep from BrinkhoffKS@SIGMOD96, single-threaded processing
-              /ij -a FS -u -s FILE_R FILE_S
+<<<<<<< HEAD
+              /ij -a FS -u -s FILE1 FILE2
        Optimized FS with grouping, hash-based parallel processing
-              /ij -a gFS -u -h -t 16 FILE_R FILE_S
+              /ij -a gFS -u -h -t 16 FILE1 FILE2
        Optimized FS with grouping and bucket indexing (1000 buckets), domain-based parallel processing under mj+greedy/adaptive setup
-              /ij -a bgFS -b 1000 -u -d -m -g -v -t 16 FILE_R FILE_S
+              /ij -a bgFS -b 1000 -u -d -m -g -v -t 16 FILE1 FILE2
+=======
+              ij -a FS -u -s FILE_R FILE_S
+       Optimized FS with grouping, hash-based parallel processing
+              ij -a gFS -u -h -t 16 FILE_R FILE_S
+       Optimized FS with grouping and bucket indexing (1000 buckets), domain-based parallel processing under mj+greedy/adaptive setup
+              ij -a bgFS -b 1000 -u -d -m -g -v -t 16 FILE_R FILE_S
+>>>>>>> b03dbbe8b254d74f41d79248f8cdbce06175379a
