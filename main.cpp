@@ -230,14 +230,9 @@ int main(int argc, char **argv)
 	}
 	
 	// Sanity check
-	if (argc-optind < 2)
-	{
-		cerr << "error - input files not specified" << endl;
-		return 1;
-	}
 	if ((runAlgorithm == ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING) &&  (runNumBuckets < 1))
 	{
-		cerr << "error - number of buckets should be at least 1" << endl;
+		cerr << "error - number of buckets must be at least 1" << endl;
 		return 1;
 	}
 	if ((!runParallel) && (!runPresorted))
@@ -245,12 +240,27 @@ int main(int argc, char **argv)
 		cerr << "error - mandatory option '-s' for single-threaded processing" << endl;
 		return 1;
 	}
-	if ((runParallel ==  PROCESSING_PARALLEL_DOMAIN_BASED) && (runGreedyScheduling) && (!runMiniJoinsBreakdown))
+	if ((runParallel == PROCESSING_PARALLEL_DOMAIN_BASED) && (runGreedyScheduling) && (!runMiniJoinsBreakdown))
 	{
 		cerr << "error - greedy scheduling can only be used with mini-joins break down" << endl;
 		return 1;
 	}
-	
+    if (((runParallel == PROCESSING_PARALLEL_HASH_BASED) || (runParallel == PROCESSING_PARALLEL_DOMAIN_BASED)) && (runNumThreads <= 1))
+    {
+        cerr << "error - number of threards must be at least 2 for parallel processing" << endl;
+        return 1;
+    }
+    if ((runParallel == PROCESSING_PARALLEL_HASH_BASED) && (floor(sqrt(runNumThreads)) != sqrt(runNumThreads)))
+    {
+        cerr << "error - number of threards must be a power of 2 for hash-based parallel processing" << endl;
+        return 1;
+    }
+    if (argc-optind < 2)
+    {
+        cerr << "error - two input files must be specified" << endl;
+        return 1;
+    }
+
 	
 	// Load inputs
 	#pragma omp parallel sections
