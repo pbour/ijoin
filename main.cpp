@@ -6,23 +6,23 @@
 
 
 // Single-threaded processing
-unsigned long long ForwardScanBased_PlaneSweep_Rolled                     (Relation &R, Relation &S);
-unsigned long long ForwardScanBased_PlaneSweep_Unrolled                   (Relation &R, Relation &S);
-unsigned long long ForwardScanBased_PlaneSweep_Grouping_Rolled            (Relation &R, Relation &S);
-unsigned long long ForwardScanBased_PlaneSweep_Grouping_Unrolled          (Relation &R, Relation &S);
-unsigned long long ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled  (Relation &R, Relation &S, const BucketIndex &BIR, const BucketIndex &BIS);
-unsigned long long ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(Relation &R, Relation &S, const BucketIndex &BIR, const BucketIndex &BIS);
+unsigned long long ForwardScanBased_PlaneSweep                   (Relation &R, Relation &S, bool runUnrolled);
+unsigned long long ForwardScanBased_PlaneSweep_Grouping          (Relation &R, Relation &S, bool runUnrolled);
+unsigned long long ForwardScanBased_PlaneSweep_Grouping_Bucketing(Relation &R, Relation &S, const BucketIndex &BIR, const BucketIndex &BIS, bool runUnrolled);
 
-// Parallel processing
-void ParallelHashBased_Partitioning(const Relation &R, const Relation &S, Relation *pR, Relation *pS, int runNumThreads);
-void ParallelHashBased_Partitioning(const Relation& R, const Relation& S, Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumThreads, int runNumBuckets);
-unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Rolled                     (Relation *pR, Relation *pS, int runNumThreads);
-unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Unrolled                   (Relation *pR, Relation *pS, int runNumThreads);
-unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Rolled            (Relation *pR, Relation *pS, int runNumThreads);
-unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Unrolled          (Relation *pR, Relation *pS, int runNumThreads);
-unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled  (Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumThreads);
-unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumThreads);
+// Hash-based parallel processing
+void ParallelHashBased_Partition(const Relation& R, const Relation& S, Relation *pR, Relation *pS, int runNumPartitionsPerRelation, int runNumThreads);
+void ParallelHashBased_Partition(const Relation& R, const Relation& S, Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumBuckets, int runNumPartitionsPerRelation, int runNumThreads);
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep                   (Relation *pR, Relation *pS, int runNumPartitionsPerRelation, int runNumThreads, bool runUnrolled);
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping          (Relation *pR, Relation *pS, int runNumPartitionsPerRelation, int runNumThreads, bool runUnrolled);
+unsigned long long ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing(Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumPartitionsPerRelation, int runNumThreads, bool runUnrolled);
 
+// Domain-based parallel processing
+void ParallelDomainBased_Partition(const Relation& R, const Relation& S, Relation *pR, Relation *pS, Relation *prR, Relation *prS, Relation *prfR, Relation *prfS, int runNumPartitionsPerRelation, int runNumThreads, bool runMiniJoinsBreakdown, bool runAdaptivePartitioning);
+void ParallelDomainBased_Partition(const Relation& R, const Relation& S, Relation *pR, Relation *pS, Relation *prR, Relation *prS, Relation *prfR, Relation *prfS, BucketIndex *BIR, BucketIndex *BIS, int runNumPartitionsPerRelation, int runNumBuckets, int runNumThreads, bool runMiniJoinsBreakdown, bool runAdaptivePartitioning);
+unsigned long long ParallelDomainBased_ForwardScanBased_PlaneSweep(Relation *pR, Relation *pS, Relation *prR, Relation *prS, Relation *prfR, Relation *prfS, int runNumPartitionsPerRelation, int runNumThreads, bool runUnrolled, bool runGreedyScheduling, bool runMiniJoinsBreakDown, bool runAdaptivePartitioning);
+unsigned long long ParallelDomainBased_ForwardScanBased_PlaneSweep_Grouping(Relation *pR, Relation *pS, Relation *prR, Relation *prS, Relation *prfR, Relation *prfS, int runNumPartitionsPerRelation, int runNumThreads, bool runUnrolled, bool runGreedyScheduling, bool runMiniJoinsBreakdown, bool runAdaptivePartitioning);
+unsigned long long ParallelDomainBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing(Relation *pR, Relation *pS, Relation *prR, Relation *prS, Relation *prfR, Relation *prfS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumPartitionsPerRelation, int runNumThreads, bool runUnrolled, bool runGreedyScheduling, bool runMiniJoinsBreakDown, bool runAdaptivePartitioning);
 
 
 void toLowercase(char *buf)
@@ -71,7 +71,7 @@ void usage()
 }
 
 
-void report(const char *file1, const char *file2, unsigned long long result, double timeSorting, double timeIndexingOrPartitioning, double timeJoining, int runAlgorithm, int runParallel, int runNumThreads, int runNumBuckets, bool runUnrolled, bool runPresorted, bool runGreedyScheduling, bool runMiniJoinsBreakDown, bool runAdaptivePartitioning)
+void report(const char *file1, const char *file2, unsigned long long result, double timeSorting, double timeIndexingOrPartitioning, double timeJoining, int runAlgorithm, int runParallel, int runNumThreads, int runNumBuckets, bool runUnrolled, bool runPresorted, bool runGreedyScheduling, bool runMiniJoinsBreakdown, bool runAdaptivePartitioning)
 {
     stringstream ss;
 
@@ -100,11 +100,11 @@ void report(const char *file1, const char *file2, unsigned long long result, dou
         case 0:
             ss << "Single-threaded";
             break;
-        case PARALLEL_HASH_BASED:
+        case PROCESSING_PARALLEL_HASH_BASED:
             ss << "Parallel, hash-based" << endl << "Threads              : " << runNumThreads;
             break;
-        case PARALLEL_DOMAIN_BASED:
-            ss << "Parallel, domain-based" << endl << "Threads              : " << runNumThreads << endl << "Greedy scheduling    : " << ((runGreedyScheduling) ? "yes": "no") << endl << "Mini-joins breakdown : " << ((runMiniJoinsBreakDown) ? "yes": "no") << endl << "Adaptive partitioning: " << ((runAdaptivePartitioning) ? "yes": "no");
+        case PROCESSING_PARALLEL_DOMAIN_BASED:
+            ss << "Parallel, domain-based" << endl << "Threads              : " << runNumThreads << endl << "Greedy scheduling    : " << ((runGreedyScheduling) ? "yes": "no") << endl << "Mini-joins breakdown : " << ((runMiniJoinsBreakdown) ? "yes": "no") << endl << "Adaptive partitioning: " << ((runAdaptivePartitioning) ? "yes": "no");
             break;
     }
     cout << "Processing           : " << ss.str() << endl;
@@ -129,13 +129,13 @@ void report(const char *file1, const char *file2, unsigned long long result, dou
 int main(int argc, char **argv)
 {
     char c;
-    unsigned int runAlgorithm = 0, runNumBuckets = 1000, runParallel = 0, runNumThreads = 1, n;
-    bool runPresorted = false, runUnrolled = false, runGreedyScheduling = false, runMiniJoinsBreakDown = false, runAdaptivePartitioning = false;
+    unsigned int runAlgorithm = 0, runNumBuckets = 1000, runParallel = PROCESSING_SINGLE_THREADED, runNumThreads = 1, runNumPartitionsPerRelation;
+    bool runPresorted = false, runUnrolled = false, runGreedyScheduling = false, runMiniJoinsBreakdown = false, runAdaptivePartitioning = false;
     Timer tim;
     double timeSorting = 0, timeIndexingOrPartitioning = 0, timeJoining = 0;
     Relation R, S, *pR, *pS, *prR, *prS, *prfR, *prfS;
-    size_t *pR_size, *pS_size, *prR_size, *prS_size, *prfR_size, *prfS_size;
-    BucketIndex BIR, BIS, *pBIR, *pBIS, *prBIR, *prBIS;
+//    size_t *pR_size, *pS_size, *prR_size, *prS_size, *prfR_size, *prfS_size;
+    BucketIndex BIR, BIS, *pBIR, *pBIS;
     unsigned long long result = 0;
 
 
@@ -167,14 +167,13 @@ int main(int argc, char **argv)
                 runNumBuckets = atoi(optarg);
                 break;
             case 'h':
-                runParallel = PARALLEL_HASH_BASED;
+                runParallel = PROCESSING_PARALLEL_HASH_BASED;
                 break;
             case 'd':
-                runParallel = PARALLEL_DOMAIN_BASED;
+                runParallel = PROCESSING_PARALLEL_DOMAIN_BASED;
                 break;
             case 't':
                 runNumThreads = atoi(optarg);
-                n = sqrt(runNumThreads);
                 break;
             case 'u':
                 runUnrolled = true;
@@ -183,7 +182,7 @@ int main(int argc, char **argv)
                 runGreedyScheduling = true;
                 break;
             case 'm':
-                runMiniJoinsBreakDown = true;
+                runMiniJoinsBreakdown = true;
                 break;
             case 'v':
                 runAdaptivePartitioning = true;
@@ -211,7 +210,7 @@ int main(int argc, char **argv)
         cerr << "error - mandatory option '-s' for single-threaded processing" << endl;
         return 1;
     }
-    if ((runParallel ==  PARALLEL_DOMAIN_BASED) && (runGreedyScheduling) && (!runMiniJoinsBreakDown))
+    if ((runParallel ==  PROCESSING_PARALLEL_DOMAIN_BASED) && (runGreedyScheduling) && (!runMiniJoinsBreakdown))
     {
         cerr << "error - greedy scheduling can only be used with mini-joins break down" << endl;
         return 1;
@@ -257,153 +256,153 @@ int main(int argc, char **argv)
         timeSorting = tim.stop();
     }
     
-    
-    // Compute join
-    switch (runAlgorithm)
+
+    // Compute join.
+    switch (runParallel)
     {
-        case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP:
-            if (!runParallel)
+        case PROCESSING_SINGLE_THREADED:
+            switch (runAlgorithm)
             {
-                if (runUnrolled)
-                {
+                case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP:
                     tim.start();
-                    result = ForwardScanBased_PlaneSweep_Unrolled(R, S);
+                    result = ForwardScanBased_PlaneSweep(R, S, runUnrolled);
                     timeJoining = tim.stop();
-                }
-                else
-                {
+                    break;
+                    
+                case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING:
                     tim.start();
-                    result = ForwardScanBased_PlaneSweep_Rolled(R, S);
+                    result = ForwardScanBased_PlaneSweep_Grouping(R, S, runUnrolled);
                     timeJoining = tim.stop();
-                }
-            }
-            else if (runParallel == PARALLEL_HASH_BASED)
-            {
-                pR = new Relation[n];
-                pS = new Relation[n];
-
-                tim.start();
-                ParallelHashBased_Partitioning(R, S, pR, pS, runNumThreads);
-                timeIndexingOrPartitioning = tim.stop();
+                    break;
                 
-                if (runUnrolled)
-                {
+                case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING:
                     tim.start();
-                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Unrolled(pR, pS, runNumThreads);
-                    timeJoining = tim.stop();
-                }
-                else
-                {
-                    tim.start();
-                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Rolled(pR, pS, runNumThreads);
-                    timeJoining = tim.stop();
-                }
+                    BIR.build(R, runNumBuckets);
+                    BIS.build(S, runNumBuckets);
+                    timeIndexingOrPartitioning = tim.stop();
 
-                delete[] pR;
-                delete[] pS;
+                    tim.start();
+                    result = ForwardScanBased_PlaneSweep_Grouping_Bucketing(R, S, BIR, BIS, runUnrolled);
+                    timeJoining = tim.stop();
+                    break;
             }
             break;
 
-        case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING:
-            if (!runParallel)
+        case PROCESSING_PARALLEL_HASH_BASED:
+            // Partitions for inputs R and S.
+            runNumPartitionsPerRelation = sqrt(runNumThreads);
+            pR = new Relation[runNumPartitionsPerRelation];
+            pS = new Relation[runNumPartitionsPerRelation];
+            switch (runAlgorithm)
             {
-                if (runUnrolled)
-                {
+                case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP:
                     tim.start();
-                    result = ForwardScanBased_PlaneSweep_Grouping_Unrolled(R, S);
-                    timeJoining = tim.stop();
-                }
-                else
-                {
+                    ParallelHashBased_Partition(R, S, pR, pS, runNumPartitionsPerRelation, runNumThreads);
+                    timeIndexingOrPartitioning = tim.stop();
+                    
                     tim.start();
-                    result = ForwardScanBased_PlaneSweep_Grouping_Rolled(R, S);
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep(pR, pS, runNumPartitionsPerRelation, runNumThreads, runUnrolled);
                     timeJoining = tim.stop();
-                }
-            }
-            else if (runParallel == PARALLEL_HASH_BASED)
-            {
-                pR = new Relation[n];
-                pS = new Relation[n];
-
-                tim.start();
-                ParallelHashBased_Partitioning(R, S, pR, pS, runNumThreads);
-                timeIndexingOrPartitioning = tim.stop();
+                    break;
                 
-                if (runUnrolled)
-                {
+                case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING:
                     tim.start();
-                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Unrolled(pR, pS, runNumThreads);
-                    timeJoining = tim.stop();
-                }
-                else
-                {
+                    ParallelHashBased_Partition(R, S, pR, pS, runNumPartitionsPerRelation, runNumThreads);
+                    timeIndexingOrPartitioning = tim.stop();
+                    
                     tim.start();
-                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Rolled(pR, pS, runNumThreads);
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping(pR, pS, runNumPartitionsPerRelation, runNumThreads, runUnrolled);
                     timeJoining = tim.stop();
-                }
-
-                delete[] pR;
-                delete[] pS;
+                    break;
+                
+                case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING:
+                    // Bucket index for inputs R and S.
+                    pBIR = new BucketIndex[runNumPartitionsPerRelation];
+                    pBIS = new BucketIndex[runNumPartitionsPerRelation];
+                    
+                    tim.start();
+                    ParallelHashBased_Partition(R, S, pR, pS, pBIR, pBIS, runNumBuckets, runNumPartitionsPerRelation, runNumThreads);
+                    timeIndexingOrPartitioning = tim.stop();
+                    
+                    tim.start();
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing(pR, pS, pBIR, pBIS, runNumPartitionsPerRelation, runNumThreads, runUnrolled);
+                    timeJoining = tim.stop();
+                    
+                    delete[] pBIR;
+                    delete[] pBIS;
+                    break;
             }
+            delete[] pR;
+            delete[] pS;
             break;
-
-        case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING:
-            if (!runParallel)
+            
+        case PROCESSING_PARALLEL_DOMAIN_BASED:
+            // Partitions for inputs R and S: pR (pS) original records (type (i)), prR (prS) replicas (type (ii)), prfR (prfS) for replicas covering the entire partition (type (iii)).
+            runNumPartitionsPerRelation = runNumThreads;
+            pR = new Relation[runNumPartitionsPerRelation];
+            pS = new Relation[runNumPartitionsPerRelation];
+            prR = new Relation[runNumPartitionsPerRelation];
+            prS = new Relation[runNumPartitionsPerRelation];
+            if (runMiniJoinsBreakdown)
             {
-                tim.start();
-                BIR.build(R, runNumBuckets);
-                BIS.build(S, runNumBuckets);
-                timeIndexingOrPartitioning = tim.stop();
-                
-                if (runUnrolled)
-                {
-                    tim.start();
-                    result = ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(R, S, BIR, BIS);
-                    timeJoining = tim.stop();
-                }
-                else
-                {
-                    tim.start();
-                    result = ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled(R, S, BIR, BIS);
-                    timeJoining = tim.stop();
-                }
+                prfR = new Relation[runNumPartitionsPerRelation];
+                prfS = new Relation[runNumPartitionsPerRelation];
             }
-            else if (runParallel == PARALLEL_HASH_BASED)
-            {
-                pR = new Relation[n];
-                pS = new Relation[n];
-                pBIR = new BucketIndex[n];
-                pBIS = new BucketIndex[n];
-                
-                tim.start();
-                ParallelHashBased_Partitioning(R, S, pR, pS, pBIR, pBIS, runNumThreads, runNumBuckets);
-                timeIndexingOrPartitioning += tim.stop();
-                
-                if (runUnrolled)
-                {
-                    tim.start();
-                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Unrolled(pR, pS, pBIR, pBIS, runNumThreads);
-                    timeJoining = tim.stop();
-                }
-                else
-                {
-                    tim.start();
-                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing_Rolled(pR, pS, pBIR, pBIS, runNumThreads);
-                    timeJoining = tim.stop();
-                }
-                
-                delete[] pR;
-                delete[] pS;
-                delete[] pBIR;
-                delete[] pBIS;
 
+            switch (runAlgorithm)
+            {
+                case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP:
+                    tim.start();
+                    ParallelDomainBased_Partition(R, S, pR, pS, prR, prS, prfR, prfS, runNumPartitionsPerRelation, runNumThreads, runMiniJoinsBreakdown, runAdaptivePartitioning);
+                    timeIndexingOrPartitioning = tim.stop();
+                    
+                    tim.start();
+                    result = ParallelDomainBased_ForwardScanBased_PlaneSweep(pR, pS, prR, prS, prfR, prfS, runNumPartitionsPerRelation, runNumThreads, runUnrolled, runGreedyScheduling, runMiniJoinsBreakdown, runAdaptivePartitioning);
+                    timeJoining = tim.stop();
+                    break;
+                
+                case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING:
+                    tim.start();
+                    ParallelDomainBased_Partition(R, S, pR, pS, prR, prS, prfR, prfS, runNumPartitionsPerRelation, runNumThreads, runMiniJoinsBreakdown, runAdaptivePartitioning);
+                    timeIndexingOrPartitioning = tim.stop();
+                    
+                    tim.start();
+                    result = ParallelDomainBased_ForwardScanBased_PlaneSweep_Grouping(pR, pS, prR, prS, prfR, prfS, runNumPartitionsPerRelation, runNumThreads, runUnrolled, runGreedyScheduling, runMiniJoinsBreakdown, runAdaptivePartitioning);
+                    timeJoining = tim.stop();
+                    break;
+                
+                case ALGORITHM_FORWARD_SCAN_BASED_PLANESWEEP_GROUPING_BUCKETING:
+                    // Bucket index for inputs R and S.
+                    pBIR = new BucketIndex[runNumThreads];
+                    pBIS = new BucketIndex[runNumThreads];
+                    
+                    tim.start();
+                    ParallelDomainBased_Partition(R, S, pR, pS, prR, prS, prfR, prfS, pBIR, pBIS, runNumBuckets, runNumPartitionsPerRelation, runNumThreads, runMiniJoinsBreakdown, runAdaptivePartitioning);
+                    timeIndexingOrPartitioning = tim.stop();
+                    
+                    tim.start();
+                    result = ParallelDomainBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing(pR, pS, prR, prS, prfR, prfS, pBIR, pBIS, runNumPartitionsPerRelation, runNumThreads, runUnrolled, runGreedyScheduling, runMiniJoinsBreakdown, runAdaptivePartitioning);
+                    timeJoining = tim.stop();
+
+                    delete[] pBIR;
+                    delete[] pBIS;
+                    break;
+            }
+            delete[] pR;
+            delete[] pS;
+            delete[] prR;
+            delete[] prS;
+            if (runMiniJoinsBreakdown)
+            {
+                delete[] prfR;
+                delete[] prfS;
             }
             break;
     }
-    
+
     
     // Report stats
-    report(argv[optind], argv[optind+1], result, timeSorting, timeIndexingOrPartitioning, timeJoining, runAlgorithm, runParallel, runNumThreads, runNumBuckets, runUnrolled, runPresorted, runGreedyScheduling, runMiniJoinsBreakDown, runAdaptivePartitioning);
+    report(argv[optind], argv[optind+1], result, timeSorting, timeIndexingOrPartitioning, timeJoining, runAlgorithm, runParallel, runNumThreads, runNumBuckets, runUnrolled, runPresorted, runGreedyScheduling, runMiniJoinsBreakdown, runAdaptivePartitioning);
 
     
     return 0;

@@ -59,7 +59,6 @@ void Relation::load(const char *filename)
 {
 	Timestamp start, end;
 	ifstream inp(filename);
-	RecordId id = 0;
 
 	
 	if (!inp)
@@ -91,7 +90,7 @@ void Relation::load(const Relation& I, size_t from, size_t by)
 
 	for (size_t i = from; i < I.size(); i += by)
 	{
-		emplace_back(I[i].start, I[i].end);
+		this->emplace_back(I[i].start, I[i].end);
 
 		this->minStart = std::min(this->minStart, I[i].start);
 		this->maxStart = std::max(this->maxStart, I[i].start);

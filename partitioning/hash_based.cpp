@@ -4,25 +4,22 @@
 
 
 
-void ParallelHashBased_Partitioning(const Relation& R, const Relation& S, Relation *pR, Relation *pS, int runNumThreads)
+void ParallelHashBased_Partition(const Relation& R, const Relation& S, Relation *pR, Relation *pS, int runNumPartitionsPerRelation, int runNumThreads)
 {
-	int n = sqrt(runNumThreads);
-	
-	
-	#pragma omp parallel num_threads(2*n)
+	#pragma omp parallel num_threads(2*runNumPartitionsPerRelation)
 	{
 		#pragma omp single
 		{
-			for (int j = 0; j < n; j++)
+			for (int p = 0; p < runNumPartitionsPerRelation; p++)
 			{
 				#pragma omp task
 				{
-					pR[j].load(R, j, n);
+					pR[p].load(R, p, runNumPartitionsPerRelation);
 				}
 				
 				#pragma omp task
 				{
-					pS[j].load(S, j, n);
+					pS[p].load(S, p, runNumPartitionsPerRelation);
 				}
 			}
 		}
@@ -30,38 +27,35 @@ void ParallelHashBased_Partitioning(const Relation& R, const Relation& S, Relati
 }
 
 
-void ParallelHashBased_Partitioning(const Relation& R, const Relation& S, Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumThreads, int runNumBuckets)
+void ParallelHashBased_Partition(const Relation& R, const Relation& S, Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumPartitionsPerRelation, int runNumThreads, int runNumBuckets)
 {
-	int n = sqrt(runNumThreads);
-	
-	
-	#pragma omp parallel num_threads(2*n)
+	#pragma omp parallel num_threads(2*runNumPartitionsPerRelation)
 	{
 		#pragma omp single
 		{
-			for (int j = 0; j < n; j++)
+			for (int p = 0; p < runNumPartitionsPerRelation; p++)
 			{
-				#pragma omp task depend(out: pR[j])
+				#pragma omp task depend(out: pR[p])
 				{
-					pR[j].load(R, j, n);
+                    pR[p].load(R, p, runNumPartitionsPerRelation);
 				}
 				
-				#pragma omp task depend(out: pS[j])
+				#pragma omp task depend(out: pS[p])
 				{
-					pS[j].load(S, j, n);
+					pS[p].load(S, p, runNumPartitionsPerRelation);
 				}
 			}
 			
-			for (int j = 0; j < n; j++)
+			for (int p = 0; p < runNumPartitionsPerRelation; p++)
 			{
-				#pragma omp task depend(in: pR[j])
+				#pragma omp task depend(in: pR[p])
 				{
-					pBIR[j].build(pR[j], runNumBuckets);
+					pBIR[p].build(pR[p], runNumBuckets);
 				}
 				
-				#pragma omp task depend(in: pS[j])
+				#pragma omp task depend(in: pS[p])
 				{
-					pBIS[j].build(pS[j], runNumBuckets);
+					pBIS[p].build(pS[p], runNumBuckets);
 				}
 			}
 		}
