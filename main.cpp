@@ -141,7 +141,6 @@ int main(int argc, char **argv)
     Timer tim;
     double timeSorting = 0, timeIndexingOrPartitioning = 0, timeJoining = 0;
     Relation R, S, *pR, *pS, *prR, *prS, *prfR, *prfS;
-//    size_t *pR_size, *pS_size, *prR_size, *prS_size, *prfR_size, *prfS_size;
     BucketIndex BIR, BIS, *pBIR, *pBIS;
     unsigned long long result = 0;
 
