@@ -67,6 +67,13 @@ void usage()
     cerr << "              adaptive partitioning activated; valid only with -d option" << endl;
     cerr << "       -?" << endl;
     cerr << "              display this help message and exit" << endl << endl;
+    cerr << "EXAMPLES" << endl;
+    cerr << "       Original forward scan-based plane sweep from BrinkhoffKS@SIGMOD96, single-threaded processing" << endl;
+    cerr << "              ij -a FS -u -s FILE1 FILE2" << endl;
+    cerr << "       Optimized FS with grouping, hash-based parallel processing" << endl;
+    cerr << "              ij -a gFS -u -h -t 16 FILE1 FILE2" << endl;
+    cerr << "       Optimized FS with grouping and bucket indexing (1000 buckets), domain-based parallel processing under mj+greedy/adaptive setup" << endl;
+    cerr << "              ij -a bgFS -b 1000 -u -d -m -g -v -t 16 FILE1 FILE2" << endl << endl;
     exit(1);
 }
 
