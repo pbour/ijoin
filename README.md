@@ -1,5 +1,6 @@
 # ijoin
 Compute interval overlap joins
+Panagiotis Bouros, Nikos Mamoulis: A Forward Scan based Plane Sweep Algorithm for Parallel Interval Joins. PVLDB 10(11): 1346-1357 (2017), http://www.vldb.org/pvldb/vol10/p1346-bouros.pdf
 
 ## Usage
        $ ij [OPTION]... [FILE1] [FILE2]
