@@ -33,7 +33,7 @@ Compute interval overlap joins
        -?
               display this help message and exit
 
-## Example
+## Examples
        Original forward scan-based plane sweep from BrinkhoffKS@SIGMOD96, single-threaded processing
               /ij -a FS -u -s FILE_R FILE_S
        Optimized FS with grouping, hash-based parallel processing
