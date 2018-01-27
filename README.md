@@ -38,5 +38,5 @@ Compute interval overlap joins
               /ij -a FS -u -s FILE_R FILE_S
        Optimized FS with grouping, hash-based parallel processing
               /ij -a gFS -u -h -t 16 FILE_R FILE_S
-       Optimized FS with grouping and bucket indexing (1000 buckets), domain-based parallel processing mj+greedy/adaptive setup
+       Optimized FS with grouping and bucket indexing (1000 buckets), domain-based parallel processing under mj+greedy/adaptive setup
               /ij -a bgFS -b 1000 -u -d -m -g -v -t 16 FILE_R FILE_S
