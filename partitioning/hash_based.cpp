@@ -56,7 +56,7 @@ void ParallelHashBased_Partition(const Relation& R, const Relation& S, Relation 
 }
 
 
-void ParallelHashBased_Partition(const Relation& R, const Relation& S, Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumPartitionsPerRelation, int runNumThreads, int runNumBuckets)
+void ParallelHashBased_Partition(const Relation& R, const Relation& S, Relation *pR, Relation *pS, BucketIndex *pBIR, BucketIndex *pBIS, int runNumBuckets, int runNumPartitionsPerRelation, int runNumThreads)
 {
 	#pragma omp parallel num_threads(2*runNumPartitionsPerRelation)
 	{

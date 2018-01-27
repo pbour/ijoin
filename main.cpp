@@ -360,7 +360,7 @@ int main(int argc, char **argv)
 					timeIndexingOrPartitioning = tim.stop();
 					
 					tim.start();
-					result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing(pR, pS, pBIR, pBIS, runNumPartitionsPerRelation, runNumThreads, runUnrolled);
+                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing(pR, pS, pBIR, pBIS, runNumPartitionsPerRelation, runNumThreads, runUnrolled);
 					timeJoining = tim.stop();
 					
 					delete[] pBIR;
