@@ -245,21 +245,21 @@ int main(int argc, char **argv)
 		cerr << "error - greedy scheduling can only be used with mini-joins break down" << endl;
 		return 1;
 	}
-    if (((runParallel == PROCESSING_PARALLEL_HASH_BASED) || (runParallel == PROCESSING_PARALLEL_DOMAIN_BASED)) && (runNumThreads <= 1))
-    {
-        cerr << "error - number of threards must be at least 2 for parallel processing" << endl;
-        return 1;
-    }
-    if ((runParallel == PROCESSING_PARALLEL_HASH_BASED) && (floor(sqrt(runNumThreads)) != sqrt(runNumThreads)))
-    {
-        cerr << "error - number of threards must be a power of 2 for hash-based parallel processing" << endl;
-        return 1;
-    }
-    if (argc-optind < 2)
-    {
-        cerr << "error - two input files must be specified" << endl;
-        return 1;
-    }
+	if (((runParallel == PROCESSING_PARALLEL_HASH_BASED) || (runParallel == PROCESSING_PARALLEL_DOMAIN_BASED)) && (runNumThreads <= 1))
+	{
+		cerr << "error - number of threards must be at least 2 for parallel processing" << endl;
+		return 1;
+	}
+	if ((runParallel == PROCESSING_PARALLEL_HASH_BASED) && (floor(sqrt(runNumThreads)) != sqrt(runNumThreads)))
+	{
+		cerr << "error - number of threards must be a power of 2 for hash-based parallel processing" << endl;
+		return 1;
+	}
+	if (argc-optind < 2)
+	{
+		cerr << "error - two input files must be specified" << endl;
+		return 1;
+	}
 
 	
 	// Load inputs
@@ -370,7 +370,7 @@ int main(int argc, char **argv)
 					timeIndexingOrPartitioning = tim.stop();
 					
 					tim.start();
-                    result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing(pR, pS, pBIR, pBIS, runNumPartitionsPerRelation, runNumThreads, runUnrolled);
+					result = ParallelHashBased_ForwardScanBased_PlaneSweep_Grouping_Bucketing(pR, pS, pBIR, pBIS, runNumPartitionsPerRelation, runNumThreads, runUnrolled);
 					timeJoining = tim.stop();
 					
 					delete[] pBIR;
