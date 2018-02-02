@@ -4,7 +4,7 @@ ifeq ($(OS),Darwin)
         CFLAGS  = -O3 -mavx -std=c++14 -w -march=native -I/usr/local/opt/llvm/include -fopenmp
         LDFLAGS = -L/usr/local/opt/llvm/lib
 else
-        CC      = g++-5
+        CC      = g++
         CFLAGS  = -O3 -mavx -std=c++14 -w -march=native -fopenmp
         LDFLAGS =
 endif
